@@ -1,16 +1,81 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
+let time1;
+let time2;
+let time3;
+let time4;
+let time5;
+let time6;
 const initialState = {
   tipo: 'CPU-Bound',
   iniciado: false,
+  espera: [],
+  pronto: [],
+  execucao: [],
 }
 
 export default class App extends React.Component {
 
   state = { ...initialState }
+
+  iniciarCPU = () => {
+    this.setState({ iniciado: true }, () => {
+      const processo = { id: 0, backgroundColor: '#4B4BFF' }
+      this.setState({ pronto: [processo], execucao: [], espera: [] })
+      time2 = setTimeout(() => { this.setState({ execucao: [processo], pronto: [] }) }, 3000)
+      time1 = setTimeout(this.iniciarCPU, 5000)
+    })
+  }
+
+  iniciarIO = () => {
+    this.setState({ iniciado: true }, () => {
+      const processo1 = { id: 0, backgroundColor: '#4B4BFF' }
+      const processo2 = { id: 1, backgroundColor: '#4B4B' }
+      //realize para mim que o processo1 va para primeiro em espera, depois de um segundo em pronto e depois de mais um segundo em execucao, e apos tudo isso fazer tudo de novo
+      // Processo1 e Processo2 vão para "espera"
+      this.setState({ espera: [processo1, processo2], pronto: [], execucao: [] })
+
+      // Após 1 segundo, Processo1 vai para "pronto" e Processo2 permanece em "espera"
+      time1 =setTimeout(() => {
+        this.setState({ pronto: [processo1], espera: [processo2] })
+
+        // Após mais 1 segundo, Processo1 vai para "execução" e Processo2 vai para "pronto"
+        time2 = setTimeout(() => {
+          this.setState({ execucao: [processo1], pronto: [], espera: [processo2] })
+
+          // Após mais 1 segundo, Processo1 vai para "espera" e Processo2 vai para "execução"
+          time3 = setTimeout(() => {
+            this.setState({ execucao: [], pronto: [], espera: [processo1, processo2] })
+
+            // Após mais 1 segundo, Processo2 vai para "espera" e Processo1 vai para "pronto"
+           time4 = setTimeout(() => {
+              this.setState({ pronto: [processo2], espera: [processo1], execucao: [] })
+
+              // Após mais 1 segundo, Processo1 vai para "execução" e Processo2 permanece em "espera"
+             time5 = setTimeout(() => {
+                this.setState({ execucao: [processo2], pronto: [], espera: [processo1] })
+
+                // Após mais 1 segundo, ambos os processos voltam para "espera" e o ciclo reinicia
+                time6 = setTimeout(this.iniciarIO, 1000)
+              }, 1000)
+            }, 1000)
+          }, 1000)
+        }, 1000)
+      }, 1000)
+
+
+
+
+
+
+
+
+
+    })
+  }
 
   render = () => {
     return (
@@ -21,8 +86,25 @@ export default class App extends React.Component {
           <Text style={{ textAlign: 'center' }}>Paulo Sergio Dias</Text>
           <Text style={{ textAlign: 'center' }}>Gianlucca Paschetta</Text>
 
-          <TouchableOpacity onPress={() => this.state.iniciado ? this.setState({ iniciado: false}) :this.setState({ iniciado: true}) }>
-            <View style={[styles.buttonIniciar, this.state.iniciado ? {backgroundColor: '#FF4B4B'} : null]}>
+          <TouchableOpacity onPress={() => {
+            if (this.state.tipo == 'CPU-Bound') {
+              this.state.iniciado ? this.setState({ ...initialState }, () => {
+                clearTimeout(time1)
+                clearTimeout(time2)
+              }) : this.iniciarCPU()
+            } else {
+              this.state.iniciado ? this.setState({ ...initialState, tipo: 'I/O Bound' }, () => {
+                clearTimeout(time1)
+                clearTimeout(time2)
+                clearTimeout(time3)
+                clearTimeout(time4)
+                clearTimeout(time5)
+                clearTimeout(time6)
+
+              }) : this.iniciarIO()
+            }
+          }}>
+            <View style={[styles.buttonIniciar, this.state.iniciado ? { backgroundColor: '#FF4B4B' } : null]}>
               {this.state.iniciado ? <AntDesign name="pause" size={24} color="white" /> : <AntDesign name="caretright" size={24} color="white" />}
             </View>
           </TouchableOpacity>
@@ -42,14 +124,32 @@ export default class App extends React.Component {
 
           </View>
 
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={styles.titulo}>Espera</Text>
+            <FlatList
+              data={this.state.espera}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <View style={[styles.processo, { backgroundColor: item.backgroundColor }]}></View>
+              )} />
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={styles.titulo}>Pronto</Text>
+            <FlatList
+              data={this.state.pronto}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <View style={[styles.processo, { backgroundColor: item.backgroundColor }]}></View>
+              )} />
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={styles.titulo}>Execução</Text>
+            <FlatList
+              data={this.state.execucao}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <View style={[styles.processo, { backgroundColor: item.backgroundColor }]}></View>
+              )} />
           </View>
         </View>
 
@@ -109,5 +209,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 10,
     shadowColor: '#000',
-  }
+  },
+  processo: { width: 50, height: 50, margin: 5, borderRadius: 50, elevation: 10, shadowColor: '#000' }
 });
