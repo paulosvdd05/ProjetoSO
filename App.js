@@ -63,10 +63,10 @@ export default class App extends React.Component {
          
                 time6 = setTimeout(this.iniciarIO, 3000)
               }, 1000)
-            }, 1000)
+            }, 4000)
           }, 3000)
         }, 1000)
-      }, 1000)
+      }, 4000)
 
 
 
