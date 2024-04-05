@@ -24,9 +24,13 @@ export default class App extends React.Component {
   iniciarCPU = () => {
     this.setState({ iniciado: true }, () => {
       const processo = { id: 0, backgroundColor: '#4B4BFF' }
-      this.setState({ pronto: [processo], execucao: [], espera: [] })
-      time2 = setTimeout(() => { this.setState({ execucao: [processo], pronto: [] }) }, 3000)
-      time1 = setTimeout(this.iniciarCPU, 5000)
+      const processo2 = { id: 1, backgroundColor: '#4B4B' }
+      this.setState({ pronto: [processo], execucao: [processo2], espera: [] })
+      time2 = setTimeout(() => {
+        this.setState({ execucao: [processo], pronto: [processo2] })
+        time1 = setTimeout(this.iniciarCPU, 2000)
+      }, 2000)
+
     })
   }
 
@@ -34,35 +38,33 @@ export default class App extends React.Component {
     this.setState({ iniciado: true }, () => {
       const processo1 = { id: 0, backgroundColor: '#4B4BFF' }
       const processo2 = { id: 1, backgroundColor: '#4B4B' }
-      //realize para mim que o processo1 va para primeiro em espera, depois de um segundo em pronto e depois de mais um segundo em execucao, e apos tudo isso fazer tudo de novo
-      // Processo1 e Processo2 vão para "espera"
-      this.setState({ espera: [processo1, processo2], pronto: [], execucao: [] })
 
-      // Após 1 segundo, Processo1 vai para "pronto" e Processo2 permanece em "espera"
-      time1 =setTimeout(() => {
-        this.setState({ pronto: [processo1], espera: [processo2] })
+      this.setState({ espera: [processo1, processo2], execucao: [], pronto: [] })
 
-        // Após mais 1 segundo, Processo1 vai para "execução" e Processo2 vai para "pronto"
+    
+      time1 = setTimeout(() => {
+        this.setState({ execucao: [processo1], espera: [processo2] })
+
+     
         time2 = setTimeout(() => {
-          this.setState({ execucao: [processo1], pronto: [], espera: [processo2] })
+          this.setState({ pronto: [processo1], execucao: [], espera: [processo2] })
 
-          // Após mais 1 segundo, Processo1 vai para "espera" e Processo2 vai para "execução"
+     
           time3 = setTimeout(() => {
             this.setState({ execucao: [], pronto: [], espera: [processo1, processo2] })
 
-            // Após mais 1 segundo, Processo2 vai para "espera" e Processo1 vai para "pronto"
-           time4 = setTimeout(() => {
-              this.setState({ pronto: [processo2], espera: [processo1], execucao: [] })
+           
+            time4 = setTimeout(() => {
+              this.setState({ execucao: [processo2], espera: [processo1], pronto: [] })
 
-              // Após mais 1 segundo, Processo1 vai para "execução" e Processo2 permanece em "espera"
-             time5 = setTimeout(() => {
-                this.setState({ execucao: [processo2], pronto: [], espera: [processo1] })
+              time5 = setTimeout(() => {
+                this.setState({ pronto: [processo2], execucao: [], espera: [processo1] })
 
-                // Após mais 1 segundo, ambos os processos voltam para "espera" e o ciclo reinicia
-                time6 = setTimeout(this.iniciarIO, 1000)
+         
+                time6 = setTimeout(this.iniciarIO, 3000)
               }, 1000)
             }, 1000)
-          }, 1000)
+          }, 3000)
         }, 1000)
       }, 1000)
 
